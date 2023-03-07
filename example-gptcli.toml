@@ -1,0 +1,4 @@
+[openai]
+access_key = "ADD_ACCESS_KEY"
+model = "gpt-3.5-turbo"
+url_completion = "https://api.openai.com/v1/chat/completions"
