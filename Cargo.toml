@@ -1,7 +1,11 @@
 [package]
 name = "gptcli"
 version = "0.1.0"
+authors = ["Peyton Duncan <dev@peytond.me>"]
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/helithumper/gptcli"
+description = "A small CLI tool and Library for interacting with OpenAI APIs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
