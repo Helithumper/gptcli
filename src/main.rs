@@ -17,7 +17,9 @@ fn main() {
     std::io::stdin().read_line(&mut input).unwrap();
 
     // Remove trailing newline
-    input.pop();
+    if let Some('\n') = input.chars().next_back() {
+        input.pop();
+    }
 
     let messages = vec![gptcli::Message {
         role: Role::User.to_string(),

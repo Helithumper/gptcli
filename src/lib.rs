@@ -1,25 +1,25 @@
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt;
-use serde::{Deserialize, Serialize};
 
 const URL_COMPLETION: &str = "https://api.openai.com/v1/chat/completions";
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Config {
-    openai: OpenAI
+    openai: OpenAI,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct OpenAI{
+struct OpenAI {
     model: String,
-    access_key: String
+    access_key: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Role {
     System,
     User,
-    Assistant
+    Assistant,
 }
 
 impl fmt::Display for Role {
@@ -32,16 +32,15 @@ impl fmt::Display for Role {
     }
 }
 
-
 #[derive(Debug, Deserialize, Serialize)]
 struct CompletionBody {
     model: String,
-    messages: Vec<Message>
+    messages: Vec<Message>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CompletionResponse{
+pub struct CompletionResponse {
     pub id: String,
     pub object: String,
     pub created: i64,
@@ -84,9 +83,7 @@ pub struct Gptcli {
 impl Gptcli {
     pub fn new(config_file: String) -> Gptcli {
         let config = Gptcli::load_config(&config_file);
-        Gptcli {
-            config
-        }
+        Gptcli { config }
     }
 
     fn load_config(config_file: &str) -> Config {
@@ -109,15 +106,22 @@ impl Gptcli {
         config
     }
 
-    pub fn submit_messages(&self, messages: Vec<Message>) -> Result<CompletionResponse, Box<dyn Error>> {
+    pub fn submit_messages(
+        &self,
+        messages: Vec<Message>,
+    ) -> Result<CompletionResponse, Box<dyn Error>> {
         let cb = CompletionBody {
             model: self.config.openai.model.to_string(),
-            messages
+            messages,
         };
 
         let client = reqwest::blocking::Client::new();
-        let res = client.post(URL_COMPLETION)
-            .header("Authorization", format!("Bearer {}", self.config.openai.access_key))
+        let res = client
+            .post(URL_COMPLETION)
+            .header(
+                "Authorization",
+                format!("Bearer {}", self.config.openai.access_key),
+            )
             .json(&cb)
             .send()?
             .text()?;
