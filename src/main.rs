@@ -5,7 +5,11 @@ use std::io::Write;
 
 fn get_config_path() -> String {
     let homepath = home_dir().unwrap();
-    format!("{}/.gptcli.toml", homepath.as_path().to_str().unwrap())
+    homepath
+        .join(".gptcli.toml")
+        .to_str()
+        .unwrap()
+        .to_string()
 }
 
 fn main() {
@@ -33,5 +37,28 @@ fn main() {
     for choice in res.choices {
         let message = format!("ChatGPT [{}]: ", choice.index).color(Color::BrightGreen);
         println!("\n{}{}", message, choice.message.content);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::get_config_path;
+    use std::env;
+    use std::path::PathBuf;
+
+    #[test]
+    fn config_path_uses_home_directory() {
+        let original = env::var("HOME").ok();
+        let temp_home = env::temp_dir().join("gptcli_test_home");
+        env::set_var("HOME", &temp_home);
+
+        let path = get_config_path();
+        assert_eq!(PathBuf::from(path), temp_home.join(".gptcli.toml"));
+
+        if let Some(val) = original {
+            env::set_var("HOME", val);
+        } else {
+            env::remove_var("HOME");
+        }
     }
 }

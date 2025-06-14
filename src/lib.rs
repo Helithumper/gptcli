@@ -2,7 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt;
 
-const URL_COMPLETION: &str = "https://api.openai.com/v1/chat/completions";
+const DEFAULT_URL_COMPLETION: &str = "https://api.openai.com/v1/chat/completions";
+
+fn default_url_completion() -> String {
+    DEFAULT_URL_COMPLETION.to_string()
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Config {
@@ -13,6 +17,8 @@ struct Config {
 struct OpenAI {
     model: String,
     access_key: String,
+    #[serde(default = "default_url_completion")]
+    url_completion: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -117,7 +123,7 @@ impl Gptcli {
 
         let client = reqwest::blocking::Client::new();
         let res = client
-            .post(URL_COMPLETION)
+            .post(&self.config.openai.url_completion)
             .header(
                 "Authorization",
                 format!("Bearer {}", self.config.openai.access_key),
@@ -136,5 +142,33 @@ impl Gptcli {
         };
 
         Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Config, default_url_completion};
+
+    #[test]
+    fn parse_config_with_custom_url() {
+        let toml_str = r#"
+        [openai]
+        model = "gpt-3.5-turbo"
+        access_key = "key"
+        url_completion = "http://example.com"
+        "#;
+        let config: Config = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.openai.url_completion, "http://example.com");
+    }
+
+    #[test]
+    fn parse_config_without_url_uses_default() {
+        let toml_str = r#"
+        [openai]
+        model = "gpt-3.5-turbo"
+        access_key = "key"
+        "#;
+        let config: Config = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.openai.url_completion, default_url_completion());
     }
 }
