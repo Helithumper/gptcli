@@ -5,7 +5,11 @@ use std::io::Write;
 
 fn get_config_path() -> String {
     let homepath = home_dir().unwrap();
-    format!("{}/.gptcli.toml", homepath.as_path().to_str().unwrap())
+    homepath
+        .join(".gptcli.toml")
+        .to_str()
+        .unwrap()
+        .to_string()
 }
 
 fn main() {
